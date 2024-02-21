@@ -41,6 +41,7 @@ compose.desktop {
             packageVersion = "1.0.3"
             windows {
                 shortcut = true
+                iconFile.set(project.file("item/chest.png"))
             }
         }
     }

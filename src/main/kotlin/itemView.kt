@@ -87,7 +87,7 @@ fun BoxScope.itemView(list: List<String>, x: MutableIntState, y: MutableIntState
                             }) {
                                 Image(
                                     painter = painterResource("item/${it[n]}.png"),"img",
-                                    modifier = Modifier.scale(3f).weight(3f).align(Alignment.CenterHorizontally),
+                                    modifier = Modifier.scale(1f).weight(3f).align(Alignment.CenterHorizontally),
                                     contentScale = ContentScale.Fit
                                 )
                                 Text(it[n].uppercase(),

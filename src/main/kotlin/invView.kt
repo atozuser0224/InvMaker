@@ -105,7 +105,7 @@ fun showInv(
                         list[n++]?.let {
                             Image(
                                 painter = painterResource("item/${it}.png"),"img",
-                                modifier = Modifier.scale(2f).offset(x=10.dp,y=10.dp),
+                                modifier = Modifier.scale(1f).offset(x=5.dp,y=5.dp),
                                 contentScale = ContentScale.Fit
                             )
                         }
