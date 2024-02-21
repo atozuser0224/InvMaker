@@ -24,7 +24,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.jetbrains.skiko.MainUIDispatcher
 import java.awt.SystemColor.text
+import kotlin.coroutines.coroutineContext
 
 @Composable
 fun BoxScope.itemView(list: List<String>, x: MutableIntState, y: MutableIntState, map: SnapshotStateMap<Int, String>,num: MutableIntState) {
@@ -49,7 +54,9 @@ fun BoxScope.itemView(list: List<String>, x: MutableIntState, y: MutableIntState
                     fontSize = 28.sp,
                     fontFamily = fontFamily
                 ),
+                singleLine = true,
                 keyboardActions = KeyboardActions(onDone = {
+
                 })
             )
             LazyColumn(modifier = Modifier

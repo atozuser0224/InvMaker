@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.useResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,14 +35,17 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants
 import org.fife.ui.rtextarea.RTextScrollPane
 import java.awt.SystemColor.text
 import java.io.File
+import java.nio.file.Paths
 import javax.swing.BoxLayout
 import javax.swing.JPanel
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 
 @Composable
 @Preview
 fun App() {
     var num = remember { mutableIntStateOf(1) }
-    val itemList = listImageFilesInItemDirectory()
+    val itemList = list
     val frame_name = remember { mutableStateOf("이곳을 눌러 수정") }
     val inv_itemList = remember {
         mutableStateMapOf<Int,String>()
@@ -77,7 +81,9 @@ fun main() = application {
     }
 }
 fun listImageFilesInItemDirectory(): List<String> {
-    val itemDir = File("C:\\Users\\wagwa\\Downloads\\InventoryManager\\InvMaker\\src\\main\\resources\\item")
+    val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
+    val itemDir = Paths.get(projectDirAbsolutePath, "/src/main/resources/item").toFile()
+    println(itemDir)
     val imageFileList = mutableListOf<String>()
 
     if (itemDir.exists() && itemDir.isDirectory) {
@@ -90,7 +96,14 @@ fun listImageFilesInItemDirectory(): List<String> {
     } else {
         println("Item directory does not exist or is not a directory.")
     }
-
+    val sb = StringBuilder("{")
+    imageFileList.filter {
+        !it.contains("top")&&!it.contains("bottom")&&!it.contains("side")
+    }.forEach {
+        sb.append("\"$it\",")
+    }
+    sb.append("}")
+    println(sb.toString())
     return imageFileList.filter {
         !it.contains("top")&&!it.contains("bottom")&&!it.contains("side")
     }

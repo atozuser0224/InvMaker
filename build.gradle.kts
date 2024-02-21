@@ -1,3 +1,4 @@
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -22,6 +23,9 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
+    @OptIn(ExperimentalComposeLibrary::class)
+    implementation(compose.components.resources)
     implementation ("com.fifesoft:rsyntaxtextarea:3.1.3")
     implementation ("com.fifesoft:autocomplete:2.9.0")
     implementation ("com.fifesoft:languagesupport:3.0.0")
@@ -34,7 +38,10 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "InvMaker"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.3"
+            windows {
+                shortcut = true
+            }
         }
     }
 }
