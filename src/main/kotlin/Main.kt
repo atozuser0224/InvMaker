@@ -1,54 +1,52 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.useResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
-import androidx.compose.ui.window.WindowPosition.PlatformDefault.x
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants
 import org.fife.ui.rtextarea.RTextScrollPane
-import java.awt.SystemColor.text
-import java.io.File
+import org.kohsuke.github.GHRelease
+import java.awt.Desktop
+import java.net.URI
 import java.nio.file.Paths
 import javax.swing.BoxLayout
 import javax.swing.JPanel
-import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
+
 
 @Composable
 @Preview
 fun App() {
+    val version = "1.1.1"
+    val accessToken = "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"
+    val ownerName = "atozuser0224"
+    val repoName = "InvMaker"
     var num = remember { mutableIntStateOf(1) }
     val itemList = list
     val frame_name = remember { mutableStateOf("이곳을 눌러 수정") }
     val inv_itemList = remember {
         mutableStateMapOf<Int,String>()
+    }
+    val inv_item_name_List = remember {
+        mutableStateMapOf<Int,String>()
+    }
+    val inv_item_lore_List = remember {
+        mutableStateMapOf<Int,MutableList<String>>()
+    }
+    val inv_item_selected_List = remember {
+        mutableStateMapOf<Int,Boolean>()
     }
     val x = remember {
         mutableIntStateOf(20)
@@ -59,15 +57,56 @@ fun App() {
     var code = remember {
         mutableStateOf("")
     }
-    val codeMaker = CodeMaker(inv_itemList,num,frame_name)
-    LaunchedEffect(inv_itemList.toList(),num.value,frame_name.value){
+    // GitHub 인증
+    var releasename = remember {
+        mutableStateOf("")
+    }
+    val dialogState = remember { mutableStateOf(false) }
+    LaunchedEffect(true) {
+        val github = org.kohsuke.github.GitHubBuilder().withOAuthToken(accessToken).build()
+
+        // 리포지토리 정보 가져오기
+        val repo: org.kohsuke.github.GHRepository = github.getRepository("$ownerName/$repoName")
+        println("sadfasdfasdfasdf")
+
+        // 최신 릴리즈 가져오기
+        val release: GHRelease? = repo.listReleases().toList()[0]
+        releasename.value = release?.name?:""
+        if (release?.name != version){
+            dialogState.value = true
+        }
+    }
+    val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
+    if (dialogState.value) {
+        AlertDialog(onDismissRequest = { dialogState.value = false},
+            title = {
+                Text(text = "새로운 업데이트!")
+            },
+            text = {Text("업데이트가 등장했습니다. 현재 버전 ${version} -> 신규 버전 ${releasename.value}")},
+            confirmButton = {
+                Button(
+                    onClick = { desktop?.browse(URI("https://github.com/atozuser0224/InvMaker/releases/tag/${releasename.value}")) },
+                ) {
+                    Text("확인", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { dialogState.value = false },
+                ) {
+                    Text("다음에 하기", color = Color.Red)
+                }
+            })
+    }
+    val codeMaker = CodeMaker(inv_itemList,num,frame_name,inv_item_name_List,inv_item_lore_List,inv_item_selected_List)
+    LaunchedEffect(inv_itemList.toList(),num.value,frame_name.value,inv_item_lore_List.toList(),inv_item_name_List.toList(),inv_item_selected_List.toList()){
         code.value = codeMaker.make()
     }
     MaterialTheme {
         Box(Modifier.fillMaxSize()) {
             invView(num, inv_itemList, x, y,frame_name)
             itemView(itemList, x, y, inv_itemList,num)
-            FuncView(num)
+            FuncView(num , inv_item_name_List, inv_item_lore_List,x,y,inv_itemList,inv_item_selected_List)
             Box(Modifier.align(Alignment.TopEnd)){
                 CodeEditor(code,Modifier.fillMaxWidth(0.33f).fillMaxHeight())
             }
@@ -76,7 +115,7 @@ fun App() {
 }
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication, icon = painterResource("item/chest.png"), state = WindowState(width = 1920.dp, height = 1080.dp, position = WindowPosition(0.dp,0.dp), placement = WindowPlacement.Maximized), title = "InvManager") {
+    Window(onCloseRequest = ::exitApplication, icon = painterResource("item/chest.png") ,state = WindowState(width = 1920.dp, height = 1080.dp, position = WindowPosition(0.dp,0.dp), placement = WindowPlacement.Maximized), title = "InvManager") {
         App()
     }
 }

@@ -29,8 +29,12 @@ dependencies {
     implementation ("com.fifesoft:rsyntaxtextarea:3.1.3")
     implementation ("com.fifesoft:autocomplete:2.9.0")
     implementation ("com.fifesoft:languagesupport:3.0.0")
-}
+    implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.5.0")
+    implementation ("org.kohsuke:github-api:1.301")
+    implementation(compose.desktop.currentOs)
+    implementation(compose.materialIconsExtended)
 
+}
 compose.desktop {
     application {
         mainClass = "MainKt"
@@ -38,10 +42,10 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "InvMaker"
-            packageVersion = "1.0.3"
+            packageVersion = "1.1.1"
             windows {
                 shortcut = true
-                iconFile.set(project.file("item/chest.png"))
+
             }
         }
     }
